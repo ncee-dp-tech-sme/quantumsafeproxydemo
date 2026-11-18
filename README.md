@@ -13,7 +13,7 @@ to the unchanged device with its own classical TLS and the proof shows the class
 `X25519MLKEM768` after.
 
 Everything is mock data and runs on `127.0.0.1` only. No npm dependencies.
-
+https://github.com/ncee-dp-tech-sme/quantumsafeproxydemo
 ```mermaid
 flowchart LR
   CC[SCADA control centre<br/>PQC TLS client + client cert] -- "TLS 1.3 + X25519MLKEM768<br/>:18441-18448" --> P[Quantum Safe Proxy]
