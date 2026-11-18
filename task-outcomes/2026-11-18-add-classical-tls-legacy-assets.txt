@@ -1,0 +1,22 @@
+PROMPT: Can you add 4 systems that are using a SSL/TLS version that is not PQC that also can be demoed and onboarded like the current plaintext 4
+Wed Nov 18 14:57:37 CET 2026
+
+OUTCOME
+Added 4 legacy assets that speak classical (non-PQC) TLS; onboarded/verified/rolled back exactly like the plaintext 4. Catalogue is now 8 assets.
+- SUB-PMU-04 Phasor Measurement Unit   TLS 1.2 ECDHE-RSA-AES128-GCM-SHA256, secp256r1  (:15025 -> PQC :18445)
+- SOL-INV-05 Solar inverter gateway    TLS 1.2 ECDHE-RSA-AES256-GCM-SHA384, secp384r1  (:15026 -> PQC :18446)
+- BAT-BMS-06 Battery storage ctrl      TLS 1.3 TLS_AES_128_GCM_SHA256, x25519          (:15027 -> PQC :18447)
+- DSO-RCL-08 Recloser controller       TLS 1.3 TLS_AES_256_GCM_SHA384, secp256r1       (:15028 -> PQC :18448)
+Changes:
+- data/assets.json: 4 assets with legacyTransport {mode,version,ciphers,groups}.
+- scripts/gen-certs.sh: RSA-2048 legacy device cert (legacy.pem/key), issued in place into existing PKI (no rotation).
+- src/lib/config.js, devices.js: cert paths, legacyTransport validation, shared TLS options/description.
+- src/legacy/ot-simulator.js: serves Modbus over TLS for those devices (device logic unchanged).
+- src/lib/verifier.js: TLS-aware direct read, wire capture before (ServerHello / TLS1.2 ServerKeyExchange curve), new check
+  "legacy endpoint negotiates only classical key exchange" (11 checks for these assets), TLS1.2 cipher names.
+- src/proxy/qsp.js: upstream hop uses the device's classical TLS; baseline scan shows ML-KEM refused + classical params negotiated.
+- ui/app.js, styles.css, src/proxy/server.js (report): amber "TLS x.y - no PQC" exposure, before-card shows classical group.
+- tests/qsp.test.js: +5 tests (catalogue + onboard/prove/rollback for each TLS device). README updated.
+Verification: npm test 11/11 pass; live demo run: all 4 onboarded 11/11 checks, classical group seen before
+(secp256r1/secp384r1/x25519/secp256r1) and X25519MLKEM768 after; rollback OK; state restored after restart.
+Limits: TLS 1.0/1.1/SSL 3 not simulated (OpenSSL 4.x no longer supports them in the local runtime); demo state/evidence reset.

@@ -1,0 +1,22 @@
+{
+  "currency": "USD",
+  "disclaimer": "ILLUSTRATIVE MOCK DATA - replace with your own program figures",
+  "rip_and_replace": {
+    "perAssetHardwareAndEngineering": 480000,
+    "perAssetRecertification": 60000,
+    "outageDaysPerAsset": 21,
+    "programMonths": 18
+  },
+  "quantum_safe_proxy": {
+    "platformYear1": 150000,
+    "perAssetOnboarding": 4000,
+    "outageDaysPerAsset": 0,
+    "minutesPerAsset": 5
+  },
+  "outageCostPerDay": 250000,
+  "frameworks": [
+    "NIST IR 8547 - transition away from quantum-vulnerable public-key crypto (RSA/ECC) by 2030-2035",
+    "EU coordinated PQC implementation roadmap - high-risk / critical infrastructure target 2030",
+    "IEC 62443 / NIS2 - secure remote access and communications for OT (illustrative mapping)"
+  ]
+}

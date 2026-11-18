@@ -1,0 +1,25 @@
+# Bob IDE configuration (all sub directories)
+.bob/
+**/.bob/
+
+# Secrets and environment
+.env
+.env.*
+!.env.example
+
+# Keys and certificates
+certs/
+certs.bak-*/
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+
+# Runtime data
+node_modules/
+logs/
+evidence/
+data/state.json
+tmp/
+.DS_Store

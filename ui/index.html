@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quantum Safe Proxy - Energy OT</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="hdr">
+    <div class="brand"><span class="brand-pre">IBM</span> Quantum Safe Proxy <span class="brand-sub">Energy OT &middot; demo with mock data</span></div>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Views"></nav>
+  </header>
+  <main>
+    <section class="kpis" id="kpis" aria-label="Key indicators"></section>
+    <section id="view-ops" class="view"></section>
+    <section id="view-exec" class="view" hidden></section>
+    <section id="view-comp" class="view" hidden></section>
+    <section class="panel audit">
+      <h2>Live audit trail</h2>
+      <ul id="audit" class="audit-list" aria-live="polite"></ul>
+    </section>
+  </main>
+  <footer class="ftr">All devices, readings, costs and names are mock data. Everything runs on 127.0.0.1.</footer>
+  <script src="/app.js"></script>
+</body>
+</html>

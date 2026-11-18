@@ -1,0 +1,13 @@
+PROMPT: The Energy Sector clients are required to have their OT systems exposed using Post Quantum Safe protocols, however, these systems cannot be updated because of older software versions and no support for modern protocols. Show how Quantum Safe Proxy can establish this without altering the old OT systems. Persona: IT Security Architect and System Admins, Audience: Compliance Officer, CTO and CFO. WOW moment, IT Admin onboard a non PQC enabled system into Quantum Safe Proxy and without any major changes it is proven the system now uses PQC protocols. Use all mock data and should run locally. (follow-up: use ./tmp in the current working directory instead of /tmp)
+Wed Nov 18 14:42:20 CET 2026
+
+OUTCOME
+Built a local, zero-dependency demo (Node 26 / OpenSSL 4.1). Run: npm run demo -> http://127.0.0.1:8080 ; npm test (6 pass).
+- Mock legacy OT devices (4, plaintext Modbus/TCP, 2005-2011 firmware) - never modified.
+- Quantum Safe Proxy: TLS1.3 + hybrid ML-KEM (X25519MLKEM768) only, AES-256-GCM, mTLS, loopback only.
+- Onboarding (UI or CLI) ~0.2 s, 0 changes to device, rollback available.
+- Independent proof (10 checks): ServerHello key_share 0x11ec/1120 B parsed from wire capture, stock OpenSSL corroboration,
+  classical/TLS1.2/no-cert/plaintext clients refused, data parity, device fingerprint unchanged, SHA-256 evidence files.
+- Dashboard: IT Admin (onboard + before/after wire), CTO/CFO (mock cost model), Compliance (evidence + printable report).
+- Limits: cert signatures classical ECDSA (ML-DSA roadmap); proxy->device hop plaintext; admin UI has no login (demo).
+See README.md for the 5-minute demo script.

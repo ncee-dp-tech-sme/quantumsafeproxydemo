@@ -1,0 +1,166 @@
+[
+  {
+    "id": "SUB-RTU-01",
+    "name": "Substation Alpha RTU",
+    "site": "Substation Alpha (138 kV)",
+    "sector": "Electricity transmission",
+    "protocol": "Modbus/TCP",
+    "vendorModel": "Acme RTU-2000",
+    "firmware": "2.1.4",
+    "firmwareYear": 2009,
+    "criticality": "Critical",
+    "unitId": 1,
+    "legacyPort": 15021,
+    "pqcPort": 18441,
+    "registers": [
+      { "name": "Bus voltage", "unit": "kV", "scale": 0.01, "base": 13820, "jitter": 25 },
+      { "name": "Line current", "unit": "A", "scale": 1, "base": 412, "jitter": 8 },
+      { "name": "Grid frequency", "unit": "Hz", "scale": 0.01, "base": 5000, "jitter": 3 },
+      { "name": "Breaker state (1=closed)", "unit": "", "scale": 1, "base": 1, "jitter": 0 }
+    ]
+  },
+  {
+    "id": "WTG-CTL-07",
+    "name": "Wind Turbine Controller 07",
+    "site": "Nordsee Wind Park North",
+    "sector": "Renewable generation",
+    "protocol": "Modbus/TCP",
+    "vendorModel": "Borealis WTC-900",
+    "firmware": "1.9.0",
+    "firmwareYear": 2007,
+    "criticality": "High",
+    "unitId": 7,
+    "legacyPort": 15022,
+    "pqcPort": 18442,
+    "registers": [
+      { "name": "Rotor speed", "unit": "rpm", "scale": 0.1, "base": 142, "jitter": 6 },
+      { "name": "Active power", "unit": "MW", "scale": 0.01, "base": 312, "jitter": 14 },
+      { "name": "Blade pitch angle", "unit": "deg", "scale": 0.1, "base": 85, "jitter": 5 },
+      { "name": "Nacelle temperature", "unit": "C", "scale": 0.1, "base": 412, "jitter": 6 }
+    ]
+  },
+  {
+    "id": "GAS-FLW-03",
+    "name": "Gas Pipeline Flow Computer",
+    "site": "Compressor Station Delta",
+    "sector": "Gas transmission",
+    "protocol": "Modbus/TCP",
+    "vendorModel": "Fluxon FC-300",
+    "firmware": "3.0.2",
+    "firmwareYear": 2011,
+    "criticality": "Critical",
+    "unitId": 3,
+    "legacyPort": 15023,
+    "pqcPort": 18443,
+    "registers": [
+      { "name": "Line pressure", "unit": "bar", "scale": 0.1, "base": 684, "jitter": 9 },
+      { "name": "Flow rate", "unit": "kNm3/h", "scale": 0.1, "base": 2210, "jitter": 40 },
+      { "name": "Gas temperature", "unit": "C", "scale": 0.1, "base": 98, "jitter": 4 },
+      { "name": "Compressor state (1=run)", "unit": "", "scale": 1, "base": 1, "jitter": 0 }
+    ]
+  },
+  {
+    "id": "HYD-GTE-02",
+    "name": "Hydro Dam Gate Controller",
+    "site": "Hydro Plant Vallen",
+    "sector": "Hydro generation",
+    "protocol": "Modbus/TCP",
+    "vendorModel": "Torrent GC-48",
+    "firmware": "1.4.7",
+    "firmwareYear": 2005,
+    "criticality": "Critical",
+    "unitId": 2,
+    "legacyPort": 15024,
+    "pqcPort": 18444,
+    "registers": [
+      { "name": "Gate position", "unit": "%", "scale": 0.1, "base": 372, "jitter": 3 },
+      { "name": "Reservoir level", "unit": "m", "scale": 0.01, "base": 21450, "jitter": 20 },
+      { "name": "Turbine flow", "unit": "m3/s", "scale": 0.1, "base": 1860, "jitter": 25 },
+      { "name": "Spillway alarm (1=alarm)", "unit": "", "scale": 1, "base": 0, "jitter": 0 }
+    ]
+  },
+  {
+    "id": "SUB-PMU-04",
+    "name": "Substation Beta Phasor Measurement Unit",
+    "site": "Substation Beta (220 kV)",
+    "sector": "Electricity transmission",
+    "protocol": "Modbus/TCP over TLS 1.2",
+    "vendorModel": "Voltex PMU-310",
+    "firmware": "4.2.1",
+    "firmwareYear": 2014,
+    "criticality": "Critical",
+    "unitId": 4,
+    "legacyPort": 15025,
+    "pqcPort": 18445,
+    "legacyTransport": { "mode": "tls", "version": "TLSv1.2", "ciphers": "ECDHE-RSA-AES128-GCM-SHA256", "groups": "prime256v1" },
+    "registers": [
+      { "name": "Voltage magnitude", "unit": "kV", "scale": 0.01, "base": 22040, "jitter": 30 },
+      { "name": "Phase angle", "unit": "deg", "scale": 0.01, "base": 1250, "jitter": 20 },
+      { "name": "Grid frequency", "unit": "Hz", "scale": 0.01, "base": 5000, "jitter": 3 },
+      { "name": "Rate of change of frequency", "unit": "Hz/s", "scale": 0.001, "base": 20, "jitter": 5 }
+    ]
+  },
+  {
+    "id": "SOL-INV-05",
+    "name": "Solar Park Inverter Gateway",
+    "site": "Solar Park Sunfield East",
+    "sector": "Renewable generation",
+    "protocol": "Modbus/TCP over TLS 1.2",
+    "vendorModel": "Helion SG-5000",
+    "firmware": "5.1.0",
+    "firmwareYear": 2015,
+    "criticality": "High",
+    "unitId": 5,
+    "legacyPort": 15026,
+    "pqcPort": 18446,
+    "legacyTransport": { "mode": "tls", "version": "TLSv1.2", "ciphers": "ECDHE-RSA-AES256-GCM-SHA384", "groups": "secp384r1" },
+    "registers": [
+      { "name": "AC output power", "unit": "MW", "scale": 0.01, "base": 4820, "jitter": 120 },
+      { "name": "DC bus voltage", "unit": "V", "scale": 1, "base": 812, "jitter": 6 },
+      { "name": "Inverter temperature", "unit": "C", "scale": 0.1, "base": 463, "jitter": 8 },
+      { "name": "Grid relay state (1=closed)", "unit": "", "scale": 1, "base": 1, "jitter": 0 }
+    ]
+  },
+  {
+    "id": "BAT-BMS-06",
+    "name": "Grid Battery Storage Controller",
+    "site": "Battery Park Harbour",
+    "sector": "Energy storage",
+    "protocol": "Modbus/TCP over TLS 1.3",
+    "vendorModel": "Voltaic BSC-720",
+    "firmware": "6.0.3",
+    "firmwareYear": 2017,
+    "criticality": "High",
+    "unitId": 6,
+    "legacyPort": 15027,
+    "pqcPort": 18447,
+    "legacyTransport": { "mode": "tls", "version": "TLSv1.3", "ciphers": "TLS_AES_128_GCM_SHA256", "groups": "X25519" },
+    "registers": [
+      { "name": "State of charge", "unit": "%", "scale": 0.1, "base": 684, "jitter": 5 },
+      { "name": "Pack voltage", "unit": "V", "scale": 0.1, "base": 7840, "jitter": 20 },
+      { "name": "Charge power", "unit": "MW", "scale": 0.01, "base": 1250, "jitter": 60 },
+      { "name": "Cell temperature", "unit": "C", "scale": 0.1, "base": 281, "jitter": 4 }
+    ]
+  },
+  {
+    "id": "DSO-RCL-08",
+    "name": "Distribution Recloser Controller",
+    "site": "Feeder 12 North",
+    "sector": "Electricity distribution",
+    "protocol": "Modbus/TCP over TLS 1.3",
+    "vendorModel": "Gridwell RC-12",
+    "firmware": "2.8.5",
+    "firmwareYear": 2016,
+    "criticality": "High",
+    "unitId": 8,
+    "legacyPort": 15028,
+    "pqcPort": 18448,
+    "legacyTransport": { "mode": "tls", "version": "TLSv1.3", "ciphers": "TLS_AES_256_GCM_SHA384", "groups": "prime256v1" },
+    "registers": [
+      { "name": "Feeder current", "unit": "A", "scale": 1, "base": 238, "jitter": 6 },
+      { "name": "Feeder voltage", "unit": "kV", "scale": 0.01, "base": 1102, "jitter": 10 },
+      { "name": "Fault counter", "unit": "", "scale": 1, "base": 3, "jitter": 0 },
+      { "name": "Recloser state (1=closed)", "unit": "", "scale": 1, "base": 1, "jitter": 0 }
+    ]
+  }
+]
