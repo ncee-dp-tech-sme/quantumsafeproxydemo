@@ -1,6 +1,8 @@
 // Change log:
 //   Wed Nov 18 14:42 CET 2026 - Initial version: Quantum Safe Proxy core (PQC TLS 1.3 termination + onboarding + evidence)
 //   Wed Nov 18 14:57 CET 2026 - Upstream hop can be classical TLS (legacyTransport); baseline scan reports the classical TLS the device negotiates
+//   Wed Nov 18 15:07 CET 2026 - Rollback (offboard) now deletes the asset's evidence files from disk
+//   Wed Nov 18 15:02 CET 2026 - Rollback archives evidence files to <evidence>/archive instead of deleting them
 //
 // The proxy terminates TLS 1.3 with hybrid ML-KEM key exchange on a new loopback listener and forwards the
 // decrypted bytes to the UNCHANGED legacy device. Nothing is installed on or configured in the legacy system.
@@ -232,7 +234,26 @@ class QuantumSafeProxy {
     await new Promise((r) => l.server.close(r));
   }
 
-  // Rollback: remove the proxy endpoint; the legacy device is exactly as it was - Wed Nov 18 14:42 CET 2026
+  // Move all evidence files of one asset (<ID>-<ISO timestamp>.json) to <evidence>/archive - Wed Nov 18 15:02 CET 2026
+  #archiveEvidence(id) {
+    const re = new RegExp(`^${id.replace(/[^A-Z0-9-]/g, '')}-\\d{4}-\\d{2}-\\d{2}T[\\w-]+\\.json$`);
+    const dir = this.cfg.paths.evidence;
+    const archive = path.join(dir, 'archive');
+    let archived = 0;
+    let files = [];
+    try { files = fs.readdirSync(dir); } catch { /* no evidence dir yet */ }
+    for (const f of files) {
+      if (!re.test(f)) continue;
+      try {
+        fs.mkdirSync(archive, { recursive: true, mode: 0o700 });
+        fs.renameSync(path.join(dir, f), path.join(archive, f));
+        archived++;
+      } catch { /* best effort */ }
+    }
+    return archived;
+  }
+
+  // Rollback: remove the proxy endpoint and archive its evidence; the legacy device is exactly as it was - Wed Nov 18 14:42 CET 2026
   async offboard(id) {
     const a = this.asset(id);
     if (!a) throw Object.assign(new Error('unknown asset'), { status: 404 });
@@ -240,7 +261,8 @@ class QuantumSafeProxy {
     await this.#close(id);
     delete this.state.onboarded[id];
     this.#saveState();
-    this.audit.record('offboard.done', { asset: a.id }, 'warn');
+    const evidenceArchived = this.#archiveEvidence(id);
+    this.audit.record('offboard.done', { asset: a.id, evidenceArchived }, 'warn');
     return this.view(a);
   }
 

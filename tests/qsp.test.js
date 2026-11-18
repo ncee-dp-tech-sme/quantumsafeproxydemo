@@ -2,6 +2,8 @@
 //   Wed Nov 18 15:20 CET 2026 - Initial version: unit + integration + security tests (node:test, no dependencies)
 //   Wed Nov 18 14:57 CET 2026 - Added onboarding tests for legacy devices that speak classical TLS 1.2/1.3
 //   Wed Nov 18 15:48 CET 2026 - Added compliance report and evidence scoping tests for fresh, onboarded, and rolled back states
+//   Wed Nov 18 15:07 CET 2026 - Assert rollback deletes evidence files from disk
+//   Wed Nov 18 15:02 CET 2026 - Assert rollback archives evidence files to evidence/archive instead of deleting them
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -78,6 +80,9 @@ test('onboarding yields verified PQC key exchange, negative tests pass, device u
     assert.ok(fs.readdirSync(cfg.paths.evidence).length >= 1);
     await assert.rejects(proxy.onboard(asset.id), /already onboarded/);
     await proxy.offboard(asset.id);
+    assert.equal(fs.readdirSync(cfg.paths.evidence).filter((f) => f.startsWith(`${asset.id}-`)).length, 0, 'rollback moves evidence out of the active folder');
+    assert.ok(fs.readdirSync(path.join(cfg.paths.evidence, 'archive')).some((f) => f.startsWith(`${asset.id}-`)), 'rollback archives evidence files');
+
     await assert.rejects(verifier.readViaPqc(cfg, asset));
     assert.equal((await verifier.readDirect(cfg, asset)).via, 'plaintext');
   } finally { await proxy.shutdown(); dev.close(); }
@@ -187,7 +192,7 @@ test('compliance report and evidence endpoint scope strictly to protected assets
     const ev1 = await get(`/api/assets/${asset.id}/evidence`);
     assert.equal(ev1.status, 200);
 
-    // 3. Rollback/Offboard: report returns to clean state even though JSON file exists on disk
+    // 3. Rollback/Offboard: report returns to clean state and the evidence JSON files are archived
     await proxy.offboard(asset.id);
     const rep2 = await get('/api/report');
     assert.equal(rep2.status, 200);
