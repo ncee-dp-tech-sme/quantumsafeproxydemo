@@ -11,7 +11,8 @@
     "proxy": "node src/proxy/server.js",
     "demo": "npm run setup --silent && node src/start-all.js",
     "cli": "node src/cli/qsp.js",
-    "reset": "rm -f data/state.json",
+    "reset": "rm -rf data/state.json evidence logs",
+    "demo:reset": "npm run reset",
     "stop": "pkill -f 'src/(start-all|legacy/ot-simulator|proxy/server).js' || true",
     "test": "node --test tests/"
   }

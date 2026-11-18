@@ -1,6 +1,7 @@
 // Change log:
 //   Wed Nov 18 14:48 CET 2026 - Initial version: admin API + dashboard host + compliance report (loopback only)
 //   Wed Nov 18 14:57 CET 2026 - Report distinguishes plaintext from classical-TLS exposed assets
+//   Wed Nov 18 15:48 CET 2026 - Scope printable report and evidence endpoint strictly to currently onboarded assets (no stale evidence leak after reset or offboard)
 'use strict';
 const fs = require('node:fs');
 const http = require('node:http');
@@ -49,13 +50,13 @@ function latestEvidence(cfg) {
   return out;
 }
 
-// Render the static compliance evidence report (all values HTML-escaped) - Wed Nov 18 14:48 CET 2026
+// Render the static compliance evidence report (all values HTML-escaped) - Wed Nov 18 15:48 CET 2026
 function renderReport(cfg, proxy) {
   const ev = latestEvidence(cfg);
   const eco = economics(cfg, proxy.summary());
   const rows = proxy.assets.map((a) => {
     const v = proxy.view(a);
-    const e = ev[a.id];
+    const e = v.status === 'pqc-protected' ? ev[a.id] : null;
     const sh = e?.wire?.after?.serverHello;
     return `<tr><td>${esc(a.id)}</td><td>${esc(a.name)}</td><td>${esc(a.vendorModel)} FW ${esc(a.firmware)} (${esc(a.firmwareYear)})</td>
       <td>${v.status === 'pqc-protected' ? 'PQC protected' : `EXPOSED (${a.legacyTransport ? `classical ${esc(a.legacyTransport.version.replace('TLSv', 'TLS '))}, no PQC` : 'plaintext'})`}</td>
@@ -63,7 +64,10 @@ function renderReport(cfg, proxy) {
       <td>${e ? (e.pass ? 'PASS' : 'FAIL') + ` (${e.checks.filter((c) => c.pass).length}/${e.checks.length})` : '-'}</td>
       <td>${e ? esc(e.sha256.slice(0, 16)) + '...' : '-'}</td></tr>`;
   }).join('');
-  const detail = Object.values(ev).map((e) => `<h3>${esc(e.assetId)} - ${esc(e.timestamp)}</h3><table>
+  const activeEv = proxy.assets
+    .map((a) => (proxy.view(a).status === 'pqc-protected' ? ev[a.id] : null))
+    .filter(Boolean);
+  const detail = activeEv.map((e) => `<h3>${esc(e.assetId)} - ${esc(e.timestamp)}</h3><table>
     <tr><th>Check</th><th>Expected</th><th>Observed</th><th>Result</th></tr>
     ${e.checks.map((c) => `<tr><td>${esc(c.title)}</td><td>${esc(c.expected)}</td><td>${esc(c.actual)}</td><td>${c.pass ? 'PASS' : 'FAIL'}</td></tr>`).join('')}</table>`).join('');
   const s = proxy.summary();
@@ -128,6 +132,8 @@ function createAdminServer(cfg, proxy, audit, log) {
         const [, id, action] = m;
         if (req.method === 'GET' && action === 'telemetry') return json(res, 200, await proxy.telemetry(id));
         if (req.method === 'GET' && action === 'evidence') {
+          const v = proxy.view(proxy.asset(id) || {});
+          if (v.status !== 'pqc-protected') return json(res, 404, { error: 'no evidence yet' });
           const e = latestEvidence(cfg)[id];
           return e ? json(res, 200, e) : json(res, 404, { error: 'no evidence yet' });
         }

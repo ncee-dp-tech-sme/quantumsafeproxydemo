@@ -1,0 +1,20 @@
+PROMPT: It looks like npm demo reset does not fully reset the evidence report.  I did a reset but the report still shows evidence data in the Observed key exchange / protocol	Verification	Evidence hash
+TIMESTAMP: Wed Nov 18 15:50:02 CET 2026
+
+ROOT CAUSE:
+1. `npm run reset` in `package.json` was only removing `data/state.json` (`rm -f data/state.json`), leaving stale `.json` files in the `evidence/` directory and log records in `logs/`.
+2. In `src/proxy/server.js`, `renderReport()` unconditionally populated verification columns (Observed key exchange / protocol, Verification, and Evidence hash) and the "Verification detail" section by reading all JSON files present in `cfg.paths.evidence` (`latestEvidence(cfg)`), regardless of whether the asset was currently onboarded/protected (`v.status === 'pqc-protected'`).
+3. The `/api/assets/:id/evidence` endpoint also returned stale evidence files for unonboarded or offboarded assets.
+
+CHANGES:
+1. `package.json`: Updated `reset` script to `rm -rf data/state.json evidence logs` and added `demo:reset` alias.
+2. `src/proxy/server.js`:
+   - Updated `renderReport()` to strictly scope evidence rows and the detail section to currently onboarded/protected assets (`v.status === 'pqc-protected'`). Unonboarded/exposed assets display `-` for key exchange, verification, and hash.
+   - Updated `/api/assets/:id/evidence` to return 404 unless the asset is currently PQC-protected.
+3. `tests/qsp.test.js`:
+   - Added test `compliance report and evidence endpoint scope strictly to protected assets` verifying clean reports on fresh/reset states, after onboarding, and after rollback/offboard.
+   - Cleaned up offboard handling in test suite.
+
+VERIFICATION:
+- `npm test`: 12/12 tests passing.
+- `npm run reset`: successfully removes `data/state.json`, `evidence/`, and `logs/`.

@@ -1,6 +1,7 @@
 // Change log:
 //   Wed Nov 18 15:20 CET 2026 - Initial version: unit + integration + security tests (node:test, no dependencies)
 //   Wed Nov 18 14:57 CET 2026 - Added onboarding tests for legacy devices that speak classical TLS 1.2/1.3
+//   Wed Nov 18 15:48 CET 2026 - Added compliance report and evidence scoping tests for fresh, onboarded, and rolled back states
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -89,7 +90,7 @@ test('classical-only and TLS 1.2 clients cannot complete a handshake (security)'
     await proxy.onboard(asset.id);
     await assert.rejects(verifier.tlsConnect(verifier.tlsOpts(cfg, asset.pqcPort, { ecdhCurve: 'X25519' })));
     await assert.rejects(verifier.tlsConnect(verifier.tlsOpts(cfg, asset.pqcPort, { minVersion: 'TLSv1.2', maxVersion: 'TLSv1.2' })));
-  } finally { await proxy.shutdown(); dev.close(); }
+  } finally { await proxy.offboard(asset.id).catch(() => {}); await proxy.shutdown(); dev.close(); }
 });
 
 // Onboard every classical-TLS legacy device (TLS 1.2 + TLS 1.3) and prove the upgrade to hybrid ML-KEM - Wed Nov 18 14:57 CET 2026
@@ -153,6 +154,52 @@ test('admin API enforces host allowlist, anti-CSRF header and id validation (sec
     assert.match(ok.headers['content-security-policy'], /default-src/);
     assert.equal((await call('GET', '/../../.env')).status, 404);
   } finally { server.close(); }
+});
+
+test('compliance report and evidence endpoint scope strictly to protected assets', async () => {
+  const dev = await legacy();
+  const proxy = new QuantumSafeProxy(cfg, [asset], log, audit);
+  const server = createAdminServer(cfg, proxy, audit, log);
+  await new Promise((r) => server.listen(cfg.adminPort, '127.0.0.1', r));
+  const get = (p) => new Promise((resolve, reject) => {
+    http.get(`http://127.0.0.1:${cfg.adminPort}${p}`, (res) => {
+      let b = '';
+      res.on('data', (d) => { b += d; });
+      res.on('end', () => resolve({ status: res.statusCode, body: b }));
+    }).on('error', reject);
+  });
+  try {
+    // 1. Initial exposed state: evidence endpoint returns 404, report has no evidence hash/group
+    const rep0 = await get('/api/report');
+    assert.equal(rep0.status, 200);
+    assert.ok(rep0.body.includes('No verification evidence yet.'));
+    assert.ok(rep0.body.includes(`<td>${asset.id}</td><td>${asset.name}</td><td>${asset.vendorModel} FW ${asset.firmware} (${asset.firmwareYear})</td>\n      <td>EXPOSED (plaintext)</td>\n      <td>-</td>\n      <td>-</td>\n      <td>-</td>`));
+    const ev0 = await get(`/api/assets/${asset.id}/evidence`);
+    assert.equal(ev0.status, 404);
+
+    // 2. Onboard: report now shows PQC group, PASS, evidence hash, and detail section
+    await proxy.onboard(asset.id);
+    const rep1 = await get('/api/report');
+    assert.equal(rep1.status, 200);
+    assert.ok(rep1.body.includes('PQC protected'));
+    assert.ok(rep1.body.includes('X25519MLKEM768 / TLSv1.3 / TLS_AES_256_GCM_SHA384'));
+    assert.ok(rep1.body.includes('PASS'));
+    const ev1 = await get(`/api/assets/${asset.id}/evidence`);
+    assert.equal(ev1.status, 200);
+
+    // 3. Rollback/Offboard: report returns to clean state even though JSON file exists on disk
+    await proxy.offboard(asset.id);
+    const rep2 = await get('/api/report');
+    assert.equal(rep2.status, 200);
+    assert.ok(rep2.body.includes('No verification evidence yet.'));
+    assert.ok(rep2.body.includes(`<td>${asset.id}</td><td>${asset.name}</td><td>${asset.vendorModel} FW ${asset.firmware} (${asset.firmwareYear})</td>\n      <td>EXPOSED (plaintext)</td>\n      <td>-</td>\n      <td>-</td>\n      <td>-</td>`));
+    const ev2 = await get(`/api/assets/${asset.id}/evidence`);
+    assert.equal(ev2.status, 404);
+  } finally {
+    server.close();
+    await proxy.shutdown();
+    dev.close();
+  }
 });
 
 test('binding to all interfaces is refused by configuration (security)', () => {

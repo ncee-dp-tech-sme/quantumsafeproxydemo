@@ -1,0 +1,6 @@
+Prompt: Initiate a new repository under https://github.com/ncee-dp-tech-sme/ name quantumsafeproxydemoMake sure no sensitive files are committed and .bob and all the sub dirs must be in the .gitignore
+Timestamp: Wed Nov 18 15:36:00 CET 2026
+
+Result: private repo https://github.com/ncee-dp-tech-sme/quantumsafeproxydemo created, branch main pushed (23 files).
+.gitignore updated: .bob/ (+ **/.bob/), .env*, certs/, *.key, *.pem, *.p12, *.pfx, *.crt, logs/, evidence/, tmp/, data/state.json.
+Verified: no .bob, .env, keys, certs, evidence or logs tracked. Remote set to HTTPS (SSH host key verification failed).
